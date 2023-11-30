@@ -1,0 +1,53 @@
+pool: "Scale Set Pool - Linux"
+
+variables:
+- group: na-des-des-us-prd-sub040-deployment.vg
+- group: DES_Automation_Credentials_Prod
+
+trigger: none
+
+stages:
+- stage: BuildAndPush
+  jobs:
+  - job: BuildAndPush
+    steps:
+
+    - checkout: self
+        # Clone repo
+    - task: Docker@2
+      displayName: Login to Docker Hub
+      inputs:
+        command: login
+        containerRegistry: 'Docker-Public-Reg'
+    - task: replacetokens@3
+      inputs:
+        targetFiles: 'dockerfile'
+        encoding: 'auto'
+        writeBOM: true
+        actionOnMissing: 'warn'
+        keepToken: false
+        tokenPrefix: '#{'
+        tokenSuffix: '}#'
+        useLegacyPattern: false
+        enableTelemetry: true
+    - task: Docker@2
+      displayName: Build & Push image to ACR
+      inputs:
+        containerRegistry: 'DASCUSPACR01'
+        repository: 'das/new-azdoexporter'
+        tags: '$(Build.BuildNumber)-$(Build.SourceBranchName)'
+        command: 'buildAndPush'
+        Dockerfile: 'dockerfile'
+    - task: CmdLine@2
+      displayName: Tag Images
+      inputs:
+          script: |
+            docker tag dascuspacr01.azurecr.io/das/new-azdoexporter:$(Build.BuildNumber)-$(Build.SourceBranchName) dascuspacr01.azurecr.io/das/new-azdoexporter:latest
+    - task: Docker@2
+      displayName: Push Latest
+      inputs:
+        containerRegistry: 'DASCUSPACR01'
+        repository: 'das/new-azdoexporter'
+        tags: 'latest'
+        command: 'push'
+
