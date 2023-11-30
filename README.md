@@ -1,5 +1,7 @@
 # Azure Pipelines Agents Prometheus Exporter
 
+** This is a fork of an old repository no longer maintained by UKHO. I needed to fix all the deprecations and recompile to bring it up to date. The original source can be found here https://github.com/UKHO/AzurePipelinesAgentExporter **
+
 A Prometheus exporter for Azure DevOps/Azure DevOps Server self hosted agents. Exposes metrics helpful for running agents across numerous queues.
 
 - Works with Azure DevOps and Azure DevOps Server. Untested support for TFS 2018
